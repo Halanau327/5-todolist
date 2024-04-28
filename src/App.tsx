@@ -3,6 +3,11 @@ import {Todolist} from "./Todolist";
 import {useState} from "react";
 import {v1} from "uuid";
 
+export type TasksStateType = {
+	[key:string]: TaskType[]
+}
+
+
 export type TaskType = {
 	id: string
 	title: string
@@ -23,7 +28,7 @@ function App() {
 		{id: todolistID2, title: 'What to buy'},
 	])
 
-	let [tasks, setTasks] = useState({
+	let [tasks, setTasks] = useState<TasksStateType>({
 		[todolistID1]: [
 			{ id: v1(), title: 'HTML&CSS', isDone: true },
 			{ id: v1(), title: 'JS', isDone: true },
@@ -34,6 +39,14 @@ function App() {
 			{ id: v1(), title: 'GraphQL', isDone: false },
 		],
 	})
+
+	const removeTodolist = (todolistId: string) => {
+		setTodolists(todolists.filter(td=>td.id !== todolistId))
+
+		delete tasks[todolistId]
+
+		setTasks({...tasks})
+	}
 
 	const removeTask = (todolistId: string, taskId: string) => {
 		setTasks({...tasks, [todolistId]: tasks[todolistId].filter(t => t.id !== taskId)})
@@ -73,6 +86,7 @@ function App() {
 				todolists.map(el => {
 					return (
 						<Todolist
+							removeTodolist={removeTodolist}
 							key={el.id}
 							todolistId={el.id}
 							title={el.title}
