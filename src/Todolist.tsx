@@ -2,6 +2,7 @@ import {TaskType} from "./App";
 import {ChangeEvent, KeyboardEvent, useState} from "react";
 import {Button} from "./Button";
 import {AddItemForm} from "./AddItemForm";
+import {EditableSpan} from "./EditableSpan";
 
 type PropsType = {
 	todolistId: string
@@ -11,11 +12,14 @@ type PropsType = {
 	addTask: (todolistId: string, title: string) => void
 	changeTaskStatus: (todolistId: string, taskId: string, taskStatus: boolean) => void
 	removeTodolist: (todolistId: string) => void
+	updateItem: (todolistId: string, taskID: string, title: string) => void,
+	updateTodolist:(todolistId: string, title: string) => void
+	taskID: string
 }
 
 type FilterValuesType = 'all' | 'active' | 'completed'
 
-export const Todolist = ({title, tasks, removeTask, addTask, changeTaskStatus, todolistId, removeTodolist}: PropsType) => {
+export const Todolist = ({title, tasks, removeTask, addTask, changeTaskStatus, todolistId, removeTodolist, updateItem, updateTodolist, taskID }: PropsType) => {
 
 	const [filter, setFilter] = useState<FilterValuesType>('all')
 
@@ -36,18 +40,28 @@ export const Todolist = ({title, tasks, removeTask, addTask, changeTaskStatus, t
 		removeTodolist(todolistId)
 	}
 
-	const addNewTask = (title: string) => {
+	const addNewHandler = (title: string) => {
 		addTask(todolistId, title)
+	}
+
+	const updateTaskHandler = (newTitle: string) => {
+		updateItem(todolistId, taskID, newTitle)
+	}
+
+	const updateTodolistHandler = (title: string) => {
+		updateTodolist(todolistId, title)
 	}
 
 	return (
 		<div>
 			<div className={'todolist-title-container'}>
-				<h3>{title}</h3>
+				<h3>
+					<EditableSpan oldTitle={title} updateItem={updateTodolistHandler}/>
+				</h3>
 				<Button title={'x'} onClick={removeTodolistHandler}/>
 			</div>
 			<div>
-				<AddItemForm addItem={addNewTask}/>
+				<AddItemForm addItem={addNewHandler}/>
 			</div>
 			{
 				tasksForTodolist.length === 0
@@ -59,14 +73,8 @@ export const Todolist = ({title, tasks, removeTask, addTask, changeTaskStatus, t
 								removeTask(todolistId, task.id)
 							}
 
-							const changeTaskStatusHandler = (e: ChangeEvent<HTMLInputElement>) => {
-								const newStatusValue = e.currentTarget.checked
-								changeTaskStatus(todolistId, task.id, newStatusValue)
-							}
-
 							return <li key={task.id} className={task.isDone ? 'is-done' : ''}>
-								<input type="checkbox" checked={task.isDone} onChange={changeTaskStatusHandler}/>
-								<span>{task.title}</span>
+								<EditableSpan oldTitle={task.title} updateItem={updateTaskHandler}/>
 								<Button onClick={removeTaskHandler} title={'x'}/>
 							</li>
 						})}
