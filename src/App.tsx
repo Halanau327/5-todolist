@@ -1,8 +1,21 @@
-import './App.css';
-import {Todolist} from "./Todolist";
-import {useState} from "react";
-import {v1} from "uuid";
-import {AddItemForm} from "./AddItemForm";
+import './App.css'
+import {Todolist} from "./Todolist"
+import {useState} from "react"
+import {v1} from "uuid"
+import {AddItemForm} from "./AddItemForm"
+import {AppBar, Toolbar} from "@mui/material"
+import IconButton from "@mui/material/IconButton"
+import Button from "@mui/material/Button";
+import MenuIcon from '@mui/icons-material/Menu'
+import Container from '@mui/material/Container'
+import Grid2 from '@mui/material/Unstable_Grid2'
+import Paper from '@mui/material/Paper'
+import {MenuButton} from "./MenuBotton"
+import { createTheme, ThemeProvider } from '@mui/material/styles'
+import Switch from '@mui/material/Switch'
+import CssBaseline from '@mui/material/CssBaseline'
+
+type ThemeMode = 'dark' | 'light'
 
 export type TasksStateType = {
 	[key:string]: TaskType[]
@@ -19,7 +32,21 @@ type TodolistType = {
 	title: string
 }
 
+
 function App() {
+
+	const [themeMode, setThemeMode] = useState<ThemeMode>('light')
+
+	const theme = createTheme({
+		palette: {
+			mode: themeMode === 'light' ? 'light' : 'dark',
+			primary: {
+				main: '#087EA4',
+			},
+		},
+	})
+
+
 	let todolistID1 = v1();
 	let todolistID2 = v1();
 
@@ -39,6 +66,10 @@ function App() {
 			{ id: v1(), title: 'GraphQL', isDone: false },
 		],
 	})
+
+	const changeModeHandler = () => {
+		setThemeMode(themeMode == 'light' ? 'dark' : 'light')
+	}
 
 	const removeTodolist = (todolistId: string) => {
 		setTodolists(todolists.filter(td=>td.id !== todolistId))
@@ -70,7 +101,6 @@ function App() {
 			isDone: false
 		}
 		setTasks({...tasks, [todolistId]: [newTask, ...tasks[todolistId]]})
-
 	}
 
 	const changeTaskStatus = (todolistId: string, taskId: string, taskStatus: boolean) => {
@@ -79,7 +109,6 @@ function App() {
 		// const newState = tasks.map(t => t.id == taskId ? {...t, isDone: taskStatus} : t)
 		// setTasks(newState)
 	}
-
 
 	const addTodolist = (title: string) => {
 		const  todolistID = v1()
@@ -97,29 +126,55 @@ function App() {
 	}
 
 	return (
-		<div className="App">
-			<AddItemForm addItem={addTodolist}/>
-			{
-				todolists.map(el => {
-					return (
-						<Todolist
-							removeTodolist={removeTodolist}
-							key={el.id}
-							todolistId={el.id}
-							title={el.title}
-							tasks={tasks[el.id]}
-							removeTask={removeTask}
-							addTask={addTask}
-							changeTaskStatus={changeTaskStatus}
-							// taskId={tasks[el.id]}
-							updateTask={updateTask}
-							updateTodolist={updateTodolist}
-						/>
-					)
-				})
-			}
+		<div>
+			<ThemeProvider theme={theme}>
+				<CssBaseline />
+			<AppBar position="static" sx={{mb: '30px'}}>
+				<Toolbar sx={{display: 'flex', justifyContent: 'space-between'}}>
+					<IconButton color="inherit">
+						<MenuIcon/>
+					</IconButton>
+					<div>
+						<MenuButton>Login</MenuButton>
+						<MenuButton>Logout</MenuButton>
+						<MenuButton background={theme.palette.primary.dark}>Faq</MenuButton>
+						<Switch color={'default'} onChange={changeModeHandler} />
+					</div>
+				</Toolbar>
+			</AppBar>
+			<Container fixed>
+				<Grid2 container sx={{mb: '30px'}}>
+					<AddItemForm addItem={addTodolist}/>
+				</Grid2>
+				<Grid2 container spacing={4}>
+				{
+						todolists.map(el => {
+							return (
+								<Grid2>
+									<Paper sx={{ p: '0 20px 20px 20px' }}>
+									<Todolist
+										removeTodolist={removeTodolist}
+										key={el.id}
+										todolistId={el.id}
+										title={el.title}
+										tasks={tasks[el.id]}
+										removeTask={removeTask}
+										addTask={addTask}
+										changeTaskStatus={changeTaskStatus}
+										// taskId={tasks[el.id]}
+										updateTask={updateTask}
+										updateTodolist={updateTodolist}
+									/>
+									</Paper>
+								</Grid2>
+							)
+						})
+					}
+				</Grid2>
+			</Container>
+			</ThemeProvider>
 		</div>
-	);
+	)
 }
 
 export default App;
